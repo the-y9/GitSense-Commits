@@ -3,10 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <title>GitSense Daily Summary</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- Markdown parser -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- Syntax highlighting -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/styles/github.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/lib/highlight.min.js"></script>
+  <script>
+    marked.setOptions({
+      highlight: function(code, lang) {
+        const validLang = hljs.getLanguage(lang) ? lang : 'plaintext';
+        return hljs.highlight(code, { language: validLang }).value;
+      }
+    });
+  </script>
+
   <style>
-    body { font-family: Arial; margin: 2rem; }
-    #summary { border: 1px solid #ddd; padding: 1rem; border-radius: 8px; margin-top: 1rem; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+      line-height: 1.6;
+      background-color: #f9f9f9;
+    }
+    h1 {
+      color: #333;
+    }
+    #summary {
+      border: 1px solid #ddd;
+      padding: 1rem;
+      border-radius: 8px;
+      background-color: #fff;
+      margin-top: 1rem;
+    }
+    .error {
+      color: #a00;
+      font-style: italic;
+    }
+    .loading {
+      font-style: italic;
+      color: #555;
+    }
+    input, button {
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      font-size: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -19,7 +62,15 @@
 
 <script>
   function loadSummary() {
-    const date = new Date(document.getElementById('datePicker').value);
+    const dateInput = document.getElementById('datePicker').value;
+    const summaryEl = document.getElementById('summary');
+
+    if (!dateInput) {
+      summaryEl.innerHTML = '<span class="error">Please select a date first.</span>';
+      return;
+    }
+
+    const date = new Date(dateInput);
     const yyyy = date.getFullYear();
     const mm = String(date.getMonth() + 1).padStart(2, '0');
     const dd = String(date.getDate()).padStart(2, '0');
@@ -27,16 +78,18 @@
 
     const url = `https://raw.githubusercontent.com/the-y9/GitSense-Commits/main/${filePath}`;
 
+    summaryEl.innerHTML = '<span class="loading">Loading summary...</span>';
+
     fetch(url)
       .then(res => {
         if (!res.ok) throw new Error("Summary not found");
         return res.text();
       })
       .then(markdown => {
-        document.getElementById('summary').innerHTML = marked.parse(markdown);
+        summaryEl.innerHTML = marked.parse(markdown);
       })
-      .catch(err => {
-        document.getElementById('summary').innerHTML = `<em>No summary found for ${yyyy}-${mm}-${dd}</em>`;
+      .catch(() => {
+        summaryEl.innerHTML = `<span class="error">No summary found for ${yyyy}-${mm}-${dd}</span>`;
       });
   }
 </script>
