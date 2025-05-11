@@ -1,0 +1,33 @@
+name: Update Latest Summary
+
+on:
+  push:
+    paths:
+      - 'summaries/**.md'
+
+jobs:
+  update-latest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Find latest summary
+        run: |
+          latest_file=$(find summaries -type f -name "*.md" | sort | tail -n 1)
+          echo "Latest file: $latest_file"
+          
+          # Extract date from file path
+          date_part=$(echo "$latest_file" | grep -oP '\d{4}/\d{2}/\d{2}' | tr '/' '-')
+          
+          # Create JSON
+          echo "{ \"latest\": \"$date_part\" }" > summaries/latest.json
+          
+      - name: Commit and push latest.json
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add summaries/latest.json
+          git commit -m "Update latest summary to $date_part" || echo "No changes to commit"
+          git push
