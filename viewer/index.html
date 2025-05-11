@@ -72,10 +72,12 @@
       fetch('https://raw.githubusercontent.com/the-y9/GitSense-Commits/main/summaries/latest.json')
         .then(res => {
           if (!res.ok) throw new Error('Could not load latest summary info.');
+          console.log("not ok");
           return res.json();
         })
         .then(data => {
           if (!data.latest) throw new Error('Invalid latest.json format');
+          console.log("no date");
           loadSummaryByDate(data.latest);
         })
         .catch(() => {
