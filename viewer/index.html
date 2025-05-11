@@ -65,17 +65,34 @@
     const dateInput = document.getElementById('datePicker').value;
     const summaryEl = document.getElementById('summary');
 
-    if (!dateInput) {
-      summaryEl.innerHTML = '<span class="error">Please select a date first.</span>';
-      return;
-    }
+    summaryEl.innerHTML = '<span class="loading">Loading summary...</span>';
 
-    const date = new Date(dateInput);
+    if (!dateInput) {
+      // Load latest from JSON
+      fetch('https://raw.githubusercontent.com/the-y9/GitSense-Commits/main/summaries/latest.json')
+        .then(res => {
+          if (!res.ok) throw new Error('Could not load latest summary info.');
+          return res.json();
+        })
+        .then(data => {
+          if (!data.latest) throw new Error('Invalid latest.json format');
+          loadSummaryByDate(data.latest);
+        })
+        .catch(() => {
+          summaryEl.innerHTML = '<span class="error">Could not fetch the latest summary date.</span>';
+        });
+    } else {
+      loadSummaryByDate(dateInput);
+    }
+  }
+
+  function loadSummaryByDate(dateStr) {
+    const summaryEl = document.getElementById('summary');
+    const date = new Date(dateStr);
     const yyyy = date.getFullYear();
     const mm = String(date.getMonth() + 1).padStart(2, '0');
     const dd = String(date.getDate()).padStart(2, '0');
     const filePath = `summaries/${yyyy}/${mm}/${dd}.md`;
-
     const url = `https://raw.githubusercontent.com/the-y9/GitSense-Commits/main/${filePath}`;
 
     summaryEl.innerHTML = '<span class="loading">Loading summary...</span>';
