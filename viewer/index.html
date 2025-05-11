@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GitSense Daily Summary</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    body { font-family: Arial; margin: 2rem; }
+    #summary { border: 1px solid #ddd; padding: 1rem; border-radius: 8px; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+
+<h1>GitSense Daily Summary Viewer</h1>
+<input type="date" id="datePicker" />
+<button onclick="loadSummary()">Load Summary</button>
+
+<div id="summary">Select a date to view your commit summary...</div>
+
+<script>
+  function loadSummary() {
+    const date = new Date(document.getElementById('datePicker').value);
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const filePath = `summaries/${yyyy}/${mm}/${dd}.md`;
+
+    const url = `https://raw.githubusercontent.com/the-y9/GitSense-Commits/main/${filePath}`;
+
+    fetch(url)
+      .then(res => {
+        if (!res.ok) throw new Error("Summary not found");
+        return res.text();
+      })
+      .then(markdown => {
+        document.getElementById('summary').innerHTML = marked.parse(markdown);
+      })
+      .catch(err => {
+        document.getElementById('summary').innerHTML = `<em>No summary found for ${yyyy}-${mm}-${dd}</em>`;
+      });
+  }
+</script>
+
+</body>
+</html>
