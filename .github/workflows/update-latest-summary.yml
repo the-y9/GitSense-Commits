@@ -5,6 +5,9 @@ on:
     paths:
       - 'summaries/**.md'
 
+permissions:
+  contents: write      
+
 jobs:
   update-latest:
     runs-on: ubuntu-latest
