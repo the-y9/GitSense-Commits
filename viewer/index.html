@@ -4,12 +4,18 @@
   <meta charset="UTF-8">
   <title>GitSense Daily Summary</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  
+
   <!-- Markdown parser -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <!-- Syntax highlighting -->
+   <!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+ <!-- Import Poppins font (add this in your HTML head)  -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/styles/github.min.css">
+  <link rel="stylesheet" href="./style.css">
   <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/lib/highlight.min.js"></script>
   <script>
     marked.setOptions({
@@ -20,98 +26,26 @@
     });
   </script>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 2rem;
-      line-height: 1.6;
-      background-color: #f9f9f9;
-    }
-    h1 {
-      color: #333;
-    }
-    #summary {
-      border: 1px solid #ddd;
-      padding: 1rem;
-      border-radius: 8px;
-      background-color: #fff;
-      margin-top: 1rem;
-    }
-    .error {
-      color: #a00;
-      font-style: italic;
-    }
-    .loading {
-      font-style: italic;
-      color: #555;
-    }
-    input, button {
-      padding: 0.5rem;
-      margin: 0.5rem 0;
-      font-size: 1rem;
-    }
-  </style>
+
 </head>
 <body>
 
 <h1>GitSense Daily Summary Viewer</h1>
-<input type="date" id="datePicker" />
-<button onclick="loadSummary()">Load Summary</button>
 
-<div id="summary">Select a date to view your commit summary...</div>
+<div style="text-align:center;">
+  <input type="text" id="datePicker" placeholder="Select date for the summary" aria-label="Select date for the summary" />
 
-<script>
-  function loadSummary() {
-    const dateInput = document.getElementById('datePicker').value;
-    const summaryEl = document.getElementById('summary');
+  <button onclick="loadSummary()" aria-label="Load summary">Load Summary</button>
+</div>
 
-    summaryEl.innerHTML = '<span class="loading">Loading summary...</span>';
+<div id="summary">
+  <div class="loading">Please select a date or load the latest summary.</div>
+</div>
 
-    if (!dateInput) {
-      // Load latest from JSON
-      fetch('https://raw.githubusercontent.com/the-y9/GitSense-Commits/main/summaries/latest.json')
-        .then(res => {
-          if (!res.ok) throw new Error('Could not load latest summary info.');
-          console.log("not ok");
-          return res.json();
-        })
-        .then(data => {
-          if (!data.latest) throw new Error('Invalid latest.json format');
-          console.log("no date");
-          loadSummaryByDate(data.latest);
-        })
-        .catch(() => {
-          summaryEl.innerHTML = '<span class="error">Could not fetch the latest summary date.</span>';
-        });
-    } else {
-      loadSummaryByDate(dateInput);
-    }
-  }
 
-  function loadSummaryByDate(dateStr) {
-    const summaryEl = document.getElementById('summary');
-    const date = new Date(dateStr);
-    const yyyy = date.getFullYear();
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
-    const filePath = `summaries/${yyyy}/${mm}/${dd}.md`;
-    const url = `https://raw.githubusercontent.com/the-y9/GitSense-Commits/main/${filePath}`;
 
-    summaryEl.innerHTML = '<span class="loading">Loading summary...</span>';
-
-    fetch(url)
-      .then(res => {
-        if (!res.ok) throw new Error("Summary not found");
-        return res.text();
-      })
-      .then(markdown => {
-        summaryEl.innerHTML = marked.parse(markdown);
-      })
-      .catch(() => {
-        summaryEl.innerHTML = `<span class="error">No summary found for ${yyyy}-${mm}-${dd}</span>`;
-      });
-  }
-</script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src ="./scripts.js"></script>
 
 </body>
 </html>
